@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | Anjana</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .admin-container {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 40px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+    .login-container {
+      max-width: 400px; margin: 150px auto; text-align: center;
+    }
+    .dashboard-section {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .dashboard-section h3 {
+      border-bottom: 2px solid var(--accent-primary);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      color: var(--accent-primary);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    .nav-tabs {
+        display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .nav-tab {
+        padding: 8px 16px; border-radius: 6px; cursor: pointer;
+        background: #e2e8f0; color: var(--text-secondary); font-weight: 600;
+    }
+    .nav-tab.active {
+        background: var(--accent-primary); color: white;
+    }
+    
+    .timeline-list-item {
+        background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .timeline-list-item button { margin-left: 10px; padding: 5px 10px; }
+  </style>
+</head>
+<body class="light-theme">
+  <!-- Nav just for back button -->
+  <header class="scrolled">
+    <nav class="container">
+      <a href="index.html" class="logo">ANJANA.</a>
+      <ul class="nav-links">
+        <li><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Site</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Login Area -->
+  <div class="glass admin-container login-container" id="loginArea">
+    <h2 style="margin-bottom:30px;">Admin Login</h2>
+    <div class="form-group">
+      <input type="text" id="username" placeholder="Username (admin)" />
+    </div>
+    <div class="form-group">
+      <input type="password" id="password" placeholder="Password (admin)" />
+    </div>
+    <button class="btn-primary" style="width:100%" onclick="login()">Login</button>
+  </div>
+
+  <!-- Dashboard Area -->
+  <div class="glass admin-container" id="dashboardArea" style="display: none; background: #f8fafc;">
+    <h2 style="margin-bottom:30px; text-align:center;">Portfolio Dashboard</h2>
+
+    <!-- General Settings -->
+    <div class="dashboard-section">
+      <h3>1. General Settings</h3>
+      
+      <div class="form-group">
+        <label>Work Status</label>
+        <select id="workStatusSelect">
+          <option value="open">Open to Work</option>
+          <option value="closed">Not Looking for Work</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Update Profile Image (Select a local file)</label>
+        <input type="file" id="profileImageInput" accept="image/*" />
+        <small style="color:var(--text-secondary)">Image will be saved in browser cache (Local Storage).</small>
+      </div>
+
+      <button class="btn-primary" onclick="saveGeneralSettings()"><i class="fas fa-save"></i> Save Settings</button>
+    </div>
+
+    <!-- Timeline Edit -->
+    <div class="dashboard-section">
+      <h3>
+          2. Manage Timeline
+          <button class="btn-primary" style="font-size: 0.9rem" onclick="openAddForm()"><i class="fas fa-plus"></i> Add New</button>
+      </h3>
+      
+      <div class="nav-tabs">
+          <div class="nav-tab active" id="tab-exp" onclick="switchListTab('experience')">Experiences</div>
+          <div class="nav-tab" id="tab-edu" onclick="switchListTab('education')">Educations</div>
+      </div>
+      
+      <div id="timelineListContainer">
+          <!-- Populated by JS -->
+      </div>
+      
+      <div id="editFormArea" style="display: none; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #cbd5e1;">
+          <h4 id="formTitle" style="margin-bottom: 20px;">Edit Item</h4>
+          <input type="hidden" id="editId" />
+          <input type="hidden" id="editCategory" />
+          
+          <div class="form-group" id="categorySelectGroup" style="display: none;">
+            <label>Category</label>
+            <select id="editCategorySelect">
+              <option value="experience">Experience</option>
+              <option value="education">Education</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Date / Duration</label>
+            <input type="text" id="editDate" placeholder="e.g. MAY 2025 – FEB 2026" />
+          </div>
+          
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="editTitle" placeholder="e.g. Senior Software Engineer" />
+          </div>
+          
+          <div class="form-group">
+            <label>Organization</label>
+            <input type="text" id="editOrg" placeholder="e.g. InfoTech Solutions" />
+          </div>
+          
+          <div class="form-group">
+            <label>Description (Supports HTML like &lt;ul&gt;&lt;li&gt;)</label>
+            <textarea id="editDesc" rows="6" placeholder="Detailed responsibilities or info..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+              <button class="btn-primary" onclick="saveItem()"><i class="fas fa-check"></i> Save Item</button>
+              <button class="btn-outline" onclick="closeForm()">Cancel</button>
+          </div>
+      </div>
+
+    </div>
+    
+    <div style="text-align: right">
+       <button class="btn-outline" onclick="resetData()"><i class="fas fa-trash"></i> Factory Reset Setup</button>
+    </div>
+
+  </div>
+
+  <script src="js/script.js?v=2"></script>
+  <script>
+    let currentTab = 'experience';
+    let isEditing = false;
+
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === 'admin' && pass === 'admin') {
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('dashboardArea').style.display = 'block';
+        loadFormInitialData();
+      } else {
+        alert('Invalid credentials! Try: admin / admin');
+      }
+    }
+
+    function loadFormInitialData() {
+      const status = localStorage.getItem('portfolio_work_status') || 'open';
+      document.getElementById('workStatusSelect').value = status;
+      renderTimelineList();
+    }
+
+    function saveGeneralSettings() {
+      const status = document.getElementById('workStatusSelect').value;
+      localStorage.setItem('portfolio_work_status', status);
+
+      const fileInput = document.getElementById('profileImageInput');
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          localStorage.setItem('portfolio_profile_image', e.target.result);
+          alert('Settings & Image Saved Successfully!');
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        alert('Settings Saved Successfully!');
+      }
+    }
+
+    function switchListTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-exp').classList.remove('active');
+        document.getElementById('tab-edu').classList.remove('active');
+        
+        if(tab === 'experience') document.getElementById('tab-exp').classList.add('active');
+        else document.getElementById('tab-edu').classList.add('active');
+        
+        renderTimelineList();
+        closeForm();
+    }
+
+    function renderTimelineList() {
+        const container = document.getElementById('timelineListContainer');
+        container.innerHTML = '';
+        const list = portfolioData[currentTab];
+        
+        if (list.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-secondary)">No items found. Add a new one.</p>';
+            return;
+        }
+
+        list.forEach((item) => {
+            const el = document.createElement('div');
+            el.className = 'timeline-list-item';
+            el.innerHTML = '<div><strong>' + item.title + '</strong> <br> <small>' + item.org + '</small></div>' +
+              '<div>' +
+                '<button class="btn-outline" style="padding: 5px 12px" onclick="editItem(\'' + item.id + '\', \'' + currentTab + '\')"><i class="fas fa-edit"></i> Edit</button>' +
+                '<button class="btn-outline" style="padding: 5px 12px; color: red; border-color: red" onclick="deleteItem(\'' + item.id + '\', \'' + currentTab + '\')"><i class="fas fa-trash"></i></button>' +
+              '</div>';
+            container.appendChild(el);
+        });
+    }
+
+    function openAddForm() {
+        isEditing = false;
+        document.getElementById('formTitle').innerText = "Add New Item";
+        document.getElementById('editId').value = "new_" + Date.now();
+        document.getElementById('editCategorySelect').value = currentTab;
+        document.getElementById('categorySelectGroup').style.display = 'block';
+        
+        document.getElementById('editDate').value = "";
+        document.getElementById('editTitle').value = "";
+        document.getElementById('editOrg').value = "";
+        document.getElementById('editDesc').value = "";
+        
+        document.getElementById('editFormArea').style.display = 'block';
+    }
+
+    function editItem(id, category) {
+        isEditing = true;
+        const item = portfolioData[category].find(x => x.id === id);
+        if(!item) return;
+        
+        document.getElementById('formTitle').innerText = "Edit: " + item.title;
+        document.getElementById('editId').value = id;
+        document.getElementById('editCategory').value = category;
+        document.getElementById('categorySelectGroup').style.display = 'none';
+        
+        document.getElementById('editDate').value = item.date;
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editOrg').value = item.org;
+        document.getElementById('editDesc').value = item.desc;
+        
+        document.getElementById('editFormArea').style.display = 'block';
+    }
+
+    function saveItem() {
+        const id = document.getElementById('editId').value;
+        const category = isEditing ? document.getElementById('editCategory').value : document.getElementById('editCategorySelect').value;
+        
+        const data = {
+            id: id,
+            date: document.getElementById('editDate').value,
+            title: document.getElementById('editTitle').value,
+            org: document.getElementById('editOrg').value,
+            desc: document.getElementById('editDesc').value,
+        };
+        
+        if (isEditing) {
+            const index = portfolioData[category].findIndex(x => x.id === id);
+            if(index !== -1) portfolioData[category][index] = data;
+        } else {
+            portfolioData[category].push(data);
+            if(category !== currentTab) switchListTab(category);
+        }
+        
+        savePortfolioData();
+        renderTimelineList();
+        closeForm();
+    }
+    
+    function deleteItem(id, category) {
+        if(confirm("Are you sure you want to delete this item?")) {
+            portfolioData[category] = portfolioData[category].filter(x => x.id !== id);
+            savePortfolioData();
+            renderTimelineList();
+        }
+    }
+
+    function savePortfolioData() {
+        localStorage.setItem('portfolio_data_v2', JSON.stringify(portfolioData));
+    }
+
+    function closeForm() {
+        document.getElementById('editFormArea').style.display = 'none';
+    }
+
+    function resetData() {
+        if(confirm("Are you sure you want to reset all data back to original CV?")) {
+            localStorage.clear();
+            alert("Data reset! Please reload the page.");
+            location.reload();
+        }
+    }
+  </script>
+</body>
+</html>
